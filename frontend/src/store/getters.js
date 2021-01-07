@@ -13,6 +13,15 @@ const getters = {
 
     let sum = state.upload.progress.reduce((acc, val) => acc + val)
     return Math.ceil(sum / state.upload.size * 100);
+  },
+  getLastViewedDetail: state => (path) => {
+    if (state.lastViewed.details.has(path)) {
+      let i = state.lastViewed.paths.indexOf(path)
+      state.lastViewed.paths.splice(i, 1)
+      state.lastViewed.paths.push(path)
+      return state.lastViewed.details.get(path)
+    }
+    return null
   }
 }
 

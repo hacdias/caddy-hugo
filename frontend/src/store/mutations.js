@@ -88,6 +88,14 @@ const mutations = {
     state.previewMode = value
   },
   setHash: (state, value) => (state.hash = value),
+  addLastViewed: (state, value) => {
+    let paths = state.lastViewed.paths
+    if (!state.lastViewed.details.has(value.path)) paths.push(value.path)
+    state.lastViewed.details.set(value.path, value.detail)
+    if (paths.length > 10) {
+      state.lastViewed.details.delete(paths.shift())
+    }
+  }
 }
 
 export default mutations

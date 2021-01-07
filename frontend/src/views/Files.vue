@@ -55,7 +55,8 @@ export default {
       'selectedCount',
       'isListing',
       'isEditor',
-      'isFiles'
+      'isFiles',
+      'getLastViewedDetail'
     ]),
     ...mapState([
       'req',
@@ -111,7 +112,7 @@ export default {
     this.fetchData()
   },
   watch: {
-    '$route': 'fetchData',
+    '$route': 'nav',
     'reload': function () {
       this.fetchData()
     }
@@ -129,6 +130,38 @@ export default {
   },
   methods: {
     ...mapMutations([ 'setLoading' ]),
+    async nav() {
+      if (!this.isPreview && !this.isEditor && clean(`/${this.$route.params.pathMatch}`).startsWith(clean(this.req.path))) {
+        let dirs = clean(this.$route.fullPath).split("/")
+
+        this.$store.commit('addLastViewed', {
+          path: clean(this.req.path),
+          detail: {
+            clicked: decodeURIComponent(dirs[dirs.length - 1]),
+            pageOffset: window.pageYOffset
+          }
+        })
+      }
+      await this.fetchData()
+      let detail = this.getLastViewedDetail(clean(`/${this.$route.params.pathMatch}`))
+      if (detail !== null) {
+        let offsetTarget = Math.min(1000, detail.pageOffset), oldPageOffset = 0, pageOffset = window.pageYOffset
+        let interval = setInterval(function () {
+          window.scrollTo(0, offsetTarget)
+          if (offsetTarget >= detail.pageOffset || oldPageOffset === pageOffset) clearInterval(interval);
+          oldPageOffset = pageOffset
+          pageOffset = window.pageYOffset
+          offsetTarget += Math.min(1000, detail.pageOffset - offsetTarget)
+        }, 20);
+
+        for (let i = 0; i < this.req.items.length; i++) {
+          if (this.req.items[i].name === detail.clicked) {
+            this.$store.commit('addSelected', i)
+            break
+          }
+        }
+      }
+    },
     async fetchData () {
       // Reset view information.
       this.$store.commit('setReload', false)

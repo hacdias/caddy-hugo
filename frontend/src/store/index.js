@@ -25,7 +25,11 @@ const state = {
   showMessage: null,
   showConfirm: null,
   previewMode: false,
-  hash: ''
+  hash: '',
+  lastViewed: {
+    paths: [],
+    details: new Map()
+  }
 }
 
 export default new Vuex.Store({
