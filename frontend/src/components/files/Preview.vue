@@ -1,13 +1,15 @@
 <template>
   <div id="previewer">
-    <div class="bar">
+    <div :class="isGallery ? 'gallery-bar' : 'bar'">
       <button @click="back" class="action" :title="$t('files.closePreview')" :aria-label="$t('files.closePreview')" id="close">
         <i class="material-icons">close</i>
       </button>
 
       <div class="title">{{ this.name }}</div>
 
-      <preview-size-button v-if="isResizeEnabled && this.req.type === 'image'" @change-size="toggleSize" v-bind:size="fullSize" :disabled="loading"></preview-size-button>
+      <rotate-button v-if="isGallery" :rotate_left="true" @rotate="setRotate($event)" :disabled="loading"></rotate-button>
+      <rotate-button v-if="isGallery" :rotate_left="false" @rotate="setRotate($event)" :disabled="loading"></rotate-button>
+      <preview-size-button v-if="isResizeEnabled && isGallery" @change-size="toggleSize" v-bind:size="fullSize" :disabled="loading"></preview-size-button>
       <button @click="openMore" id="more" :aria-label="$t('buttons.more')" :title="$t('buttons.more')" class="action">
         <i class="material-icons">more_vert</i>
       </button>
@@ -37,7 +39,7 @@
 
     <template v-if="!loading">
       <div class="preview">
-        <ExtendedImage v-if="req.type == 'image'" :src="raw"></ExtendedImage>
+        <ExtendedImage v-if="isGallery" :src="raw" :angle="angle"></ExtendedImage>
         <audio v-else-if="req.type == 'audio'" :src="raw" autoplay controls></audio>
         <video v-else-if="req.type == 'video'" :src="raw" autoplay controls>
           <track
@@ -66,6 +68,7 @@ import { mapState } from 'vuex'
 import url from '@/utils/url'
 import { baseURL, resizePreview } from '@/utils/constants'
 import { files as api } from '@/api'
+import RotateButton from "@/components/buttons/RotatePreview"
 import PreviewSizeButton from '@/components/buttons/PreviewSize'
 import InfoButton from '@/components/buttons/Info'
 import DeleteButton from '@/components/buttons/Delete'
@@ -74,7 +77,6 @@ import DownloadButton from '@/components/buttons/Download'
 import ExtendedImage from './ExtendedImage'
 
 const mediaTypes = [
-  "image",
   "video",
   "audio",
   "blob"
@@ -83,6 +85,7 @@ const mediaTypes = [
 export default {
   name: 'preview',
   components: {
+    RotateButton,
     PreviewSizeButton,
     InfoButton,
     DeleteButton,
@@ -97,7 +100,9 @@ export default {
       listing: null,
       name: '',
       subtitles: [],
-      fullSize: false
+      fullSize: false,
+      isGallery: false,
+      angle: 0
     }
   },
   computed: {
@@ -130,21 +135,51 @@ export default {
   watch: {
     $route: function () {
       this.updatePreview()
+    },
+    showMore: function () {
+      if (!this.showMore) this.hideGalleryBar()
     }
+  },
+  created() {
+    if (this.req.type === 'image') this.isGallery = true
   },
   async mounted () {
     window.addEventListener('keydown', this.key)
     this.$store.commit('setPreviewMode', true)
     this.listing = this.oldReq.items
     this.$root.$on('preview-deleted', this.deleted)
+    if (this.isGallery) {
+      this.$root.$on('gallery-nav', this.nav)
+      document.querySelector('#previewer .overlay').addEventListener('mouseenter', this.showGalleryBar)
+      document.querySelector('#previewer .gallery-bar #dropdown').addEventListener('mouseenter', this.showGalleryBar)
+    }
     this.updatePreview()
   },
   beforeDestroy () {
     window.removeEventListener('keydown', this.key)
     this.$store.commit('setPreviewMode', false)
     this.$root.$off('preview-deleted', this.deleted)
+    if (this.isGallery) {
+      this.$root.$off('gallery-nav', this.nav)
+      document.querySelector('#previewer .overlay').removeEventListener('mouseenter', this.showGalleryBar)
+      document.querySelector('#previewer .gallery-bar #dropdown').removeEventListener('mouseenter', this.showGalleryBar)
+    }
   },
   methods: {
+    nav(e) {
+      if (e===0 && this.hasPrevious) this.prev()
+      else if (e===1 && this.hasNext) this.next()
+    },
+    showGalleryBar() {
+      document.querySelector('#previewer .gallery-bar').style.opacity = 1
+      document.querySelector('#previewer .gallery-bar').style.zIndex = 'auto'
+      document.querySelector('#previewer .preview .image-ex-container').style.zIndex = -1
+    },
+    hideGalleryBar() {
+      document.querySelector('#previewer .gallery-bar').style.removeProperty('opacity')
+      document.querySelector('#previewer .gallery-bar').style.zIndex = 2
+      document.querySelector('#previewer .preview .image-ex-container').style.zIndex = 'auto'
+    },
     deleted () {
       this.listing = this.listing.filter(item => item.name !== this.name)
 
@@ -180,6 +215,7 @@ export default {
       }
     },
     async updatePreview () {
+      this.angle = 0
       if (this.req.subtitles) {
         this.subtitles = this.req.subtitles.map(sub => `${baseURL}/api/raw${sub}?auth=${this.jwt}&inline=true`)
       }
@@ -206,14 +242,20 @@ export default {
         }
 
         for (let j = i - 1; j >= 0; j--) {
-          if (mediaTypes.includes(this.listing[j].type)) {
+          if (this.isGallery && this.listing[j].type === 'image') {
+            this.previousLink = this.listing[j].url
+            break
+          } else if (!this.isGallery && mediaTypes.includes(this.listing[j].type)) {
             this.previousLink = this.listing[j].url
             break
           }
         }
 
         for (let j = i + 1; j < this.listing.length; j++) {
-          if (mediaTypes.includes(this.listing[j].type)) {
+          if (this.isGallery && this.listing[j].type === 'image') {
+            this.nextLink = this.listing[j].url
+            break
+          } else if (!this.isGallery && mediaTypes.includes(this.listing[j].type)) {
             this.nextLink = this.listing[j].url
             break
           }
@@ -227,6 +269,13 @@ export default {
     },
     resetPrompts () {
       this.$store.commit('closeHovers')
+    },
+    setRotate(rotate_left) {
+      if (rotate_left) {
+        this.angle -= 90
+      } else {
+        this.angle += 90
+      }
     },
     toggleSize () {
       this.fullSize = !this.fullSize

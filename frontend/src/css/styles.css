@@ -139,6 +139,41 @@
   color: #fff;
 }
 
+#previewer .gallery-bar {
+  width: 100%;
+  position: absolute;
+  z-index: 2;
+  background-color: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  display: flex;
+  padding: 0.5em;
+  height: 3.7em;
+  transition: opacity 0.1s ease;
+}
+
+#previewer .gallery-bar:hover {
+  opacity: 1;
+}
+
+#previewer .gallery-bar > * {
+  flex: 0 0 auto;
+}
+
+#previewer .gallery-bar .title {
+  display: block;
+  flex: 1 1 auto;
+  padding: 0 1em;
+  line-height: 2.3em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 1.2em;
+  color: #fff;
+}
+
+#previewer .action {  
+  z-index: 2;
+}
+
 #previewer .action i {
   color: #fff;
 }

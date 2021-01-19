@@ -4,6 +4,7 @@
     ref="container"
     @touchstart="touchStart"
     @touchmove="touchMove"
+    @touchend="touchEnd"
     @dblclick="zoomAuto"
     @mousedown="mousedownStart"
     @mousemove="mouseMove"
@@ -19,6 +20,7 @@ import throttle from 'lodash.throttle'
 export default {
   props: {
     src: String,
+    angle: Number,
     moveDisabledTime: {
       type: Number,
       default: () => 200
@@ -29,7 +31,7 @@ export default {
     },
     minScale: {
       type: Number,
-      default: () => 0.25
+      default: () => 1
     },
     classList: {
       type: Array,
@@ -50,6 +52,8 @@ export default {
       lastX: null,
       lastY: null,
       inDrag: false,
+      touches: 0,
+      navThreshold: 50,
       lastTouchDistance: 0,
       moveDisabled: false,
       disabledTimer: null,
@@ -79,12 +83,86 @@ export default {
   },
   watch: {
     src: function () {
-      this.scale = 1
-      this.setZoom()
+      this.setCenter()
+    },
+    angle: function () {
       this.setCenter()
     }
   },
+  computed: {
+    imgHeight() {
+      let img = this.$refs.imgex
+
+      // slow version
+      // return img.clientHeight * Math.cos(this.angle * Math.PI) + img.clientWidth * Math.sin(this.angle * Math.PI)
+      return !(this.angle % 180) ? img.clientHeight : img.clientWidth
+    },
+    imgWidth() {
+      let img = this.$refs.imgex
+
+      // slow version
+      // return img.clientWidth * Math.cos(this.angle * Math.PI) + img.clientHeight * Math.sin(this.angle * Math.PI)
+      return !(this.angle % 180) ? img.clientWidth : img.clientHeight
+    }
+  },
   methods: {
+    fit() {
+      const wScale = window.innerWidth / this.imgWidth
+      const hScale = window.innerHeight / this.imgHeight
+
+      this.scale = Math.min(wScale, hScale)
+      this.minScale = this.scale
+      this.maxScale = 4 * this.scale
+      this.setZoom()
+    },
+    refit() {
+      const target = this.fitScreenTarget()
+      this.doMove(target[0], target[1])
+    },
+    fitScreenTarget() {
+      if (this.scale <= this.minScale) {
+        let style = this.$refs.imgex.style
+        let posX = this.pxStringToNumber(style.left)
+        let posY = this.pxStringToNumber(style.top)
+        return [this.position.center.x - posX, this.position.center.y - posY]
+      }
+      else {
+        let img = this.$refs.imgex
+
+        const rect = img.getBoundingClientRect()
+        const width = window.innerWidth
+        const height = window.innerHeight
+
+        let x = 0,y = 0
+
+        // left out of viewport
+        if (rect.left < 0 && rect.right < width) x = Math.min(-rect.left, width - rect.right)
+        // right out of viewport
+        else if (rect.left > 0 && rect.right > width) x = Math.min(-rect.left, width - rect.right)
+
+        // top out of viewport
+        if (rect.top < 0 && rect.bottom < height) y = Math.min(-rect.top, height - rect.bottom)
+
+        // bottom out of viewport
+        else if (rect.top > 0 && rect.bottom > height) y = Math.min(-rect.top, height - rect.bottom)
+
+        return [x,y]
+      }
+    },
+    checkNav(x) {
+      if (this.scale <= this.minScale) {
+        if (x > this.navThreshold) this.$root.$emit('gallery-nav', 0)
+        else if (x < -this.navThreshold) this.$root.$emit('gallery-nav', 1)
+      } else {
+        let img = this.$refs.imgex
+
+        const rect = img.getBoundingClientRect()
+        const width = window.innerWidth
+
+        if (x > this.navThreshold && rect.left > this.navThreshold && rect.right > width + this.navThreshold) this.$root.$emit('gallery-nav', 0)
+        else if (x < -this.navThreshold && rect.left < - this.navThreshold && rect.right < width - this.navThreshold) this.$root.$emit('gallery-nav', 1)
+      }
+    },
     onLoad() {
       let img = this.$refs.imgex
 
@@ -102,6 +180,7 @@ export default {
     },
     onMouseUp() {
       this.inDrag = false
+      this.refit()
     },
     onResize: throttle(function() {
       if (this.imageLoaded) {
@@ -113,11 +192,13 @@ export default {
       let container = this.$refs.container
       let img = this.$refs.imgex
 
-      this.position.center.x = Math.floor((container.clientWidth - img.clientWidth) / 2)
-      this.position.center.y = Math.floor((container.clientHeight - img.clientHeight) / 2)
+      this.position.center.x = Math.floor((window.innerWidth - img.clientWidth) / 2 - container.offsetLeft)
+      this.position.center.y = Math.floor((window.innerHeight - img.clientHeight) / 2 - container.offsetTop)
 
       img.style.left = this.position.center.x + 'px'
       img.style.top = this.position.center.y + 'px'
+
+      this.fit()
     },
     mousedownStart(event) {
       this.lastX = null
@@ -128,6 +209,7 @@ export default {
     mouseMove(event) {
       if (!this.inDrag) return
       this.doMove(event.movementX, event.movementY)
+      this.checkNav(event.movementX)
       event.preventDefault()
     },
     mouseUp(event) {
@@ -138,21 +220,20 @@ export default {
       this.lastX = null
       this.lastY = null
       this.lastTouchDistance = null
+
+      setTimeout(() => {
+        this.touches = 0
+      }, 300)
+
+      this.touches++
+      if (this.touches > 1) {
+        this.zoomAuto(event)
+      }
       event.preventDefault()
     },
     zoomAuto(event) {
-      switch (this.scale) {
-        case 1:
-          this.scale = 2
-          break
-        case 2:
-          this.scale = 4
-          break
-        default:
-        case 4:
-          this.scale = 1
-          break
-      }
+      if (this.minScale <= this.scale && this.scale < 2 * this.minScale) this.scale *= 2
+      else this.scale /= 2
       this.setZoom()
       event.preventDefault()
     },
@@ -192,6 +273,12 @@ export default {
         this.lastX = event.targetTouches[0].pageX
         this.lastY = event.targetTouches[0].pageY
         this.doMove(x, y)
+        this.checkNav(x)
+      }
+    },
+    touchEnd(event) {
+      if (event.targetTouches.length === 0) {
+        this.refit()
       }
     },
     doMove(x, y) {
@@ -220,7 +307,8 @@ export default {
     setZoom() {
       this.scale = this.scale < this.minScale ? this.minScale : this.scale
       this.scale = this.scale > this.maxScale ? this.maxScale : this.scale
-      this.$refs.imgex.style.transform = `scale(${this.scale})`
+      this.$refs.imgex.style.transform = `scale(${this.scale}) rotate(${this.angle}deg)`
+      this.refit()
     },
     pxStringToNumber(style) {
       return +style.replace("px", "")
@@ -231,7 +319,6 @@ export default {
 <style>
 .image-ex-container {
   margin: auto;
-  overflow: hidden;
   position: relative;
 }
 
