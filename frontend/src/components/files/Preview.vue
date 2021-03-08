@@ -38,6 +38,7 @@
     <template v-if="!loading">
       <div class="preview">
         <ExtendedImage v-if="req.type == 'image'" :src="raw"></ExtendedImage>
+        <ThreeViewer v-else-if="is3DModelFile" :src="raw"></ThreeViewer>
         <audio v-else-if="req.type == 'audio'" :src="raw" autoplay controls></audio>
         <video v-else-if="req.type == 'video'" :src="raw" autoplay controls>
           <track
@@ -64,6 +65,7 @@
 <script>
 import { mapState } from 'vuex'
 import url from '@/utils/url'
+import { is3DModelFile } from '@/utils/filetype'
 import { baseURL, resizePreview } from '@/utils/constants'
 import { files as api } from '@/api'
 import PreviewSizeButton from '@/components/buttons/PreviewSize'
@@ -72,6 +74,7 @@ import DeleteButton from '@/components/buttons/Delete'
 import RenameButton from '@/components/buttons/Rename'
 import DownloadButton from '@/components/buttons/Download'
 import ExtendedImage from './ExtendedImage'
+import ThreeViewer from './ThreeViewer'
 
 const mediaTypes = [
   "image",
@@ -88,7 +91,8 @@ export default {
     DeleteButton,
     RenameButton,
     DownloadButton,
-    ExtendedImage
+    ExtendedImage,
+    ThreeViewer
   },
   data: function () {
     return {
@@ -125,6 +129,9 @@ export default {
     },
     isResizeEnabled () {
       return resizePreview
+    },
+    is3DModelFile () {
+      return is3DModelFile(this.req.extension)
     }
   },
   watch: {
@@ -232,7 +239,7 @@ export default {
     },
     toggleSize () {
       this.fullSize = !this.fullSize
-    }
+    },
   }
 }
 </script>

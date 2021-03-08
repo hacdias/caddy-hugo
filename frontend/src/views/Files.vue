@@ -34,6 +34,7 @@ import InternalError from './errors/500'
 import Preview from '@/components/files/Preview'
 import Listing from '@/components/files/Listing'
 import { files as api } from '@/api'
+import { is3DModelFile } from '@/utils/filetype'
 import { mapGetters, mapState, mapMutations } from 'vuex'
 
 function clean (path) {
@@ -66,7 +67,14 @@ export default {
       'show'
     ]),
     isPreview () {
-      return !this.loading && !this.isListing && !this.isEditor || this.loading && this.$store.state.previewMode
+      return !this.loading
+          && !this.isListing
+          && (!this.isEditor || this.is3DModelFile)
+          || this.loading
+          && this.$store.state.previewMode
+    },
+    is3DModelFile () {
+      return is3DModelFile(this.req.extension)
     },
     breadcrumbs () {
       let parts = this.$route.path.split('/')
