@@ -33,7 +33,8 @@
     "switchView": "Switch view",
     "toggleSidebar": "Toggle sidebar",
     "update": "Update",
-    "upload": "Upload"
+    "upload": "Upload",
+    "playlist": "Playlist"
   },
   "download": {
     "downloadFile": "Download File",

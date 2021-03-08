@@ -32,7 +32,8 @@
     "switchView": "Changer le mode d'affichage",
     "toggleSidebar": "Afficher/Masquer la barre latérale",
     "update": "Mettre à jour",
-    "upload": "Importer"
+    "upload": "Importer",
+    "playlist": "Liste de lecture"
   },
   "download": {
     "downloadFile": "Download File",

@@ -108,14 +108,17 @@ export default {
     hasNext () {
       return (this.nextLink !== '')
     },
+    authPath () {
+      return `${url.encodePath(this.req.path)}?auth=${this.jwt}`
+    },
     download () {
-      return `${baseURL}/api/raw${url.encodePath(this.req.path)}?auth=${this.jwt}`
+      return `${baseURL}/api/raw${this.authPath}`
     },
     previewUrl () {
       if (this.req.type === 'image' && !this.fullSize) {
-        return `${baseURL}/api/preview/big${url.encodePath(this.req.path)}?auth=${this.jwt}`
+        return `${baseURL}/api/preview/big${this.authPath}`
       }
-      return `${baseURL}/api/raw${url.encodePath(this.req.path)}?auth=${this.jwt}`
+      return `${baseURL}/api/raw${this.authPath}`
     },
     raw () {
       return `${this.previewUrl}&inline=true`

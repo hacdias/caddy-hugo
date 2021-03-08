@@ -11,6 +11,7 @@
   "dependencies": {
     "ace-builds": "^1.4.7",
     "clipboard": "^2.0.4",
+    "file-saver": "^2.0.5",
     "js-base64": "^2.5.1",
     "lodash.clonedeep": "^4.5.0",
     "lodash.throttle": "^4.1.1",
