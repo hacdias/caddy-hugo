@@ -176,6 +176,16 @@ func TestService_Resize(t *testing.T) {
 			},
 			matcher: sizeMatcher(100, 100),
 		},
+		"resize heic": {
+			options: []Option{WithMode(ResizeModeFill)},
+			width:   100,
+			height:  100,
+			source: func(t *testing.T) afero.File {
+				t.Helper()
+				return openFile(t, "testdata/image3.heic")
+			},
+			matcher: sizeMatcher(100, 100),
+		},
 		"resize with high quality": {
 			options: []Option{WithMode(ResizeModeFill), WithQuality(QualityHigh)},
 			width:   100,
@@ -426,6 +436,14 @@ func TestService_FormatFromExtension(t *testing.T) {
 		"bmp": {
 			ext:  ".bmp",
 			want: FormatBmp,
+		},
+		"heic": {
+			ext:  ".heic",
+			want: FormatHeic,
+		},
+		"heif": {
+			ext:  ".heif",
+			want: FormatHeic,
 		},
 		"unknown": {
 			ext:     ".mov",

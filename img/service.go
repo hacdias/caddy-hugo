@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"image"
 	"io"
+	"strings"
 
+	"github.com/adrium/goheif"
 	"github.com/disintegration/imaging"
 	"github.com/dsoprea/go-exif/v3"
 	"github.com/marusama/semaphore/v2"
@@ -38,6 +40,7 @@ png
 gif
 tiff
 bmp
+heic
 )
 */
 type Format int
@@ -90,22 +93,25 @@ fill
 type ResizeMode int
 
 func (s *Service) FormatFromExtension(ext string) (Format, error) {
-	format, err := imaging.FormatFromExtension(ext)
-	if err != nil {
-		return -1, ErrUnsupportedFormat
+	if format, err := imaging.FormatFromExtension(ext); err == nil {
+		switch format {
+		case imaging.JPEG:
+			return FormatJpeg, nil
+		case imaging.PNG:
+			return FormatPng, nil
+		case imaging.GIF:
+			return FormatGif, nil
+		case imaging.TIFF:
+			return FormatTiff, nil
+		case imaging.BMP:
+			return FormatBmp, nil
+		}
 	}
-	switch format {
-	case imaging.JPEG:
-		return FormatJpeg, nil
-	case imaging.PNG:
-		return FormatPng, nil
-	case imaging.GIF:
-		return FormatGif, nil
-	case imaging.TIFF:
-		return FormatTiff, nil
-	case imaging.BMP:
-		return FormatBmp, nil
+
+	if strings.EqualFold(ext, ".heif") || strings.EqualFold(ext, ".heic") {
+		return FormatHeic, nil
 	}
+
 	return -1, ErrUnsupportedFormat
 }
 
@@ -166,7 +172,13 @@ func (s *Service) Resize(ctx context.Context, in io.Reader, width, height int, o
 		}
 	}
 
-	img, err := imaging.Decode(wrappedReader, imaging.AutoOrientation(true))
+	var img image.Image
+	if format == FormatHeic {
+		img, err = goheif.Decode(wrappedReader)
+	} else {
+		img, err = imaging.Decode(wrappedReader, imaging.AutoOrientation(true))
+	}
+
 	if err != nil {
 		return err
 	}
