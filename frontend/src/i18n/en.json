@@ -118,7 +118,7 @@
     "currentlyNavigating": "Currently navigating on:",
     "deleteMessageMultiple": "Are you sure you want to delete {count} file(s)?",
     "deleteMessageSingle": "Are you sure you want to delete this file/folder?",
-    "deleteMessageShare": "Are you sure you want to delete this share({path})?",
+    "deleteMessageShare": "Are you sure you want to delete this share?",
     "deleteTitle": "Delete files",
     "displayName": "Display Name:",
     "download": "Download files",
