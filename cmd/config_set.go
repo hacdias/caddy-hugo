@@ -55,6 +55,8 @@ you want to change. Other options will remain unchanged.`,
 				set.Branding.DisableExternal = mustGetBool(flags, flag.Name)
 			case "branding.files":
 				set.Branding.Files = mustGetString(flags, flag.Name)
+			case "onlyoffice":
+				set.OnlyOffice = mustGetString(flags, flag.Name)
 			}
 		})
 

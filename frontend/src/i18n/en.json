@@ -193,6 +193,8 @@
     "newPassword": "Your new password",
     "newPasswordConfirm": "Confirm your new password",
     "newUser": "New User",
+    "onlyOffice": "Only Office Integration",
+    "onlyOfficeUrl": "Only Office URL (leave blank to disable)",
     "password": "Password",
     "passwordUpdated": "Password updated!",
     "path": "Path",

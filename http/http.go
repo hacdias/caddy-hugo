@@ -53,6 +53,8 @@ func NewHandler(
 	users.Handle("/{id:[0-9]+}", monkey(userGetHandler, "")).Methods("GET")
 	users.Handle("/{id:[0-9]+}", monkey(userDeleteHandler, "")).Methods("DELETE")
 
+	api.PathPrefix("/onlyoffice").Handler(monkey(onlyofficeCallbackHandler, "/api/onlyoffice/callback")).Methods("POST")
+
 	api.PathPrefix("/resources").Handler(monkey(resourceGetHandler, "/api/resources")).Methods("GET")
 	api.PathPrefix("/resources").Handler(monkey(resourceDeleteHandler(fileCache), "/api/resources")).Methods("DELETE")
 	api.PathPrefix("/resources").Handler(monkey(resourcePostHandler(fileCache), "/api/resources")).Methods("POST")

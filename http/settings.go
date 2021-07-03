@@ -16,6 +16,7 @@ type settingsData struct {
 	Branding      settings.Branding     `json:"branding"`
 	Shell         []string              `json:"shell"`
 	Commands      map[string][]string   `json:"commands"`
+	OnlyOffice    string                `json:"onlyoffice"`
 }
 
 var settingsGetHandler = withAdmin(func(w http.ResponseWriter, r *http.Request, d *data) (int, error) {
@@ -27,6 +28,7 @@ var settingsGetHandler = withAdmin(func(w http.ResponseWriter, r *http.Request, 
 		Branding:      d.settings.Branding,
 		Shell:         d.settings.Shell,
 		Commands:      d.settings.Commands,
+		OnlyOffice:    d.settings.OnlyOffice,
 	}
 
 	return renderJSON(w, r, data)
@@ -46,6 +48,7 @@ var settingsPutHandler = withAdmin(func(w http.ResponseWriter, r *http.Request, 
 	d.settings.Branding = req.Branding
 	d.settings.Shell = req.Shell
 	d.settings.Commands = req.Commands
+	d.settings.OnlyOffice = req.OnlyOffice
 
 	err = d.store.Settings.Save(d.settings)
 	return errToStatus(err), err

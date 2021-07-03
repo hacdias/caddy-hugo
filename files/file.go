@@ -188,6 +188,9 @@ func (i *FileInfo) detectType(modify, saveContent, readHeader bool) error {
 			i.Content = string(content)
 		}
 		return nil
+	case strings.HasPrefix(mimetype, "application/vnd.openxmlformats-officedocument"):
+		i.Type = "officedocument"
+		return nil
 	default:
 		i.Type = "blob"
 	}

@@ -188,6 +188,8 @@
     "newPassword": "您的新密碼",
     "newPasswordConfirm": "重輸一遍新密碼",
     "newUser": "建立使用者",
+    "onlyOffice": "Only Office Integration",
+    "onlyOfficeUrl": "Only Office URL (leave blank to disable)",
     "password": "密碼",
     "passwordUpdated": "密碼已更新！",
     "path": "",

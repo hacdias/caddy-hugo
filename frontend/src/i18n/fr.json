@@ -188,6 +188,8 @@
     "newPassword": "Votre nouveau mot de passe",
     "newPasswordConfirm": "Confirmation du nouveau mot de passe",
     "newUser": "Nouvel Utilisateur",
+    "onlyOffice": "Intégration Only Office",
+    "onlyOfficeUrl": "URL vers OnlyOffice (laisser vide pour désactiver)",
     "password": "Mot de passe",
     "passwordUpdated": "Mot de passe mis à jour !",
     "path": "",

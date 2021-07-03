@@ -22,6 +22,7 @@
 <script>
 import { files as api } from "@/api";
 import { mapState, mapMutations } from "vuex";
+import { onlyOffice } from "@/utils/constants";
 
 import HeaderBar from "@/components/header/HeaderBar";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -42,6 +43,7 @@ export default {
     Preview,
     Listing,
     Editor: () => import("@/views/files/Editor"),
+    OnlyOfficeEditor: () => import("@/views/files/OnlyOfficeEditor"),
   },
   data: function () {
     return {
@@ -63,6 +65,8 @@ export default {
         this.req.type === "textImmutable"
       ) {
         return "editor";
+      } else if (this.req.type === "officedocument" && onlyOffice !== "") {
+        return "OnlyOfficeEditor";
       } else {
         return "preview";
       }

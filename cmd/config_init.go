@@ -39,6 +39,7 @@ override the options.`,
 				DisableExternal: mustGetBool(flags, "branding.disableExternal"),
 				Files:           mustGetString(flags, "branding.files"),
 			},
+			OnlyOffice: "",
 		}
 
 		ser := &settings.Server{

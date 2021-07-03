@@ -188,6 +188,8 @@
     "newPassword": "Noua ta parolă",
     "newPasswordConfirm": "Confirmă noua parolă",
     "newUser": "Utilizator nou",
+    "onlyOffice": "Only Office Integration",
+    "onlyOfficeUrl": "Only Office URL (leave blank to disable)",
     "password": "Parola",
     "passwordUpdated": "Parola actualizată!",
     "path": "",

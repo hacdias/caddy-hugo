@@ -188,6 +188,8 @@
     "newPassword": "Nova senha",
     "newPasswordConfirm": "Confirme a nova senha",
     "newUser": "Novo usuário",
+    "onlyOffice": "Only Office Integration",
+    "onlyOfficeUrl": "Only Office URL (leave blank to disable)",
     "password": "Senha",
     "passwordUpdated": "Senha atualizada!",
     "path": "",

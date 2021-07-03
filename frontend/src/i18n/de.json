@@ -188,6 +188,8 @@
     "newPassword": "Ihr neues Passwort.",
     "newPasswordConfirm": "Bestätigen Sie Ihr neues Passwort",
     "newUser": "Neuer Benutzer",
+    "onlyOffice": "Only Office Integration",
+    "onlyOfficeUrl": "Only Office URL (leave blank to disable)",
     "password": "Passwort",
     "passwordUpdated": "Passwort aktualisiert!",
     "path": "",

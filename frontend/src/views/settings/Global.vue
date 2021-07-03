@@ -83,6 +83,20 @@
               id="branding-files"
             />
           </p>
+
+          <h3>{{ $t("settings.onlyOffice") }}</h3>
+
+          <p>
+            <label for="onlyoffice-url">{{
+              $t("settings.onlyOfficeUrl")
+            }}</label>
+            <input
+              class="input input--block"
+              type="text"
+              v-model="settings.onlyoffice"
+              id="onlyoffice-url"
+            />
+          </p>
         </div>
 
         <div class="card-action">
