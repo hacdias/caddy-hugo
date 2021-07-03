@@ -9,6 +9,7 @@ HEALTHCHECK --start-period=2s --interval=5s --timeout=3s \
 VOLUME /srv
 EXPOSE 80
 
+RUN mkdir /var/lib/filebrowser && chmod a+w /var/lib/filebrowser
 COPY .docker.json /.filebrowser.json
 COPY filebrowser /filebrowser
 
