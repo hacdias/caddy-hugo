@@ -20,6 +20,56 @@ Please refer to our docs at [https://filebrowser.org/features](https://filebrows
 
 For installation instructions please refer to our docs at [https://filebrowser.org/installation](https://filebrowser.org/installation).
 
+##Docker 
+```bash
+docker run \
+    -v /path/to/root:/srv \
+    -v /path/filebrowser.db:/database.db \
+    -v /path/.filebrowser.json:/.filebrowser.json \
+    --user $(id -u):$(id -g)
+    -p 80:80 \
+    filebrowser/filebrowser
+```
+
+## Docker-compose
+First of all, create to 2 needed files before running docker-compose
+
+* /local/path/to/database.db
+* /local/path/to/.filebrowser.json
+
+The **.filebrowser.json** contains your configuration.
+The context of the settings in this file is in reference to the docker container, and does should not reflect your local environment.
+
+```json
+{
+  "port": 80,
+  "baseURL": "",
+  "address": "",
+  "log": "stdout",
+  "database": "/database.db",
+  "root": "/srv"
+}
+```
+Next you bring the docker container up with a similar docker-compose.yml file:
+
+```yml
+version: '3.3'
+services:
+    filebrowser:
+        volumes:
+            - '/local/path/to/shares:/srv'
+            - '/local/path/to/database.db:/database.db'
+            - '/local/path/to/.filebrowser.json:/.filebrowser.json:ro'
+        ports:
+            - '80:80'
+        image: filebrowser/filebrowser
+```
+
+``` bash
+docker-compose up --build
+```
+
+
 ## Configuration
 
 [Authentication Method](https://filebrowser.org/configuration/authentication-method) - You can change the way the user authenticates with the filebrowser server
